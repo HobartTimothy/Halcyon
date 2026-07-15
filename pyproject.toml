@@ -1,0 +1,85 @@
+[project]
+name = "halcyon"
+version = "0.1.0"
+requires-python = ">=3.14,<3.15"
+
+license = "Apache-2.0"
+readme = "README.md"
+description = "基于 LangChain 和 LangGraph 开发的 AI 智能体，专注于中国法律和司法案例"
+
+authors = [
+    { name = "RobertHU", email = "18256077691@163.com" }
+]
+
+dependencies = [
+    # API 服务
+    "fastapi>=0.139,<1.0",
+    "uvicorn[standard]>=0.35,<1.0",
+    "pydantic>=2.11,<3.0",
+    "pydantic-settings>=2.14,<3.0",
+    "python-multipart>=0.0.20,<1.0",
+    "orjson>=3.10,<4.0",
+
+    # LangGraph / Agent / LLM
+    "langgraph>=1.2.9,<2.0",
+    "langgraph-checkpoint-postgres>=3.1,<4.0",
+    "langchain-core>=1.4.9,<2.0",
+    "langchain-openai>=1.3.5,<2.0",
+    "langsmith>=0.10,<1.0",
+    "tiktoken>=0.9,<1.0",
+
+    # PostgreSQL / ORM / 向量数据库
+    "sqlalchemy[asyncio]>=2.0.51,<3.0",
+    "asyncpg>=0.31,<1.0",
+    "psycopg[binary,pool]>=3.3.4,<4.0",
+    "alembic>=1.18,<2.0",
+    "pgvector>=0.5,<1.0",
+
+    # Redis
+    "redis[hiredis]>=8.0,<9.0",
+
+    # HTTP / 重试
+    "httpx>=0.28,<1.0",
+    "tenacity>=9.1,<10.0",
+
+    # 日志
+    "structlog>=26.1,<27.0",
+
+    # OpenTelemetry
+    "opentelemetry-api>=1.43,<1.44",
+    "opentelemetry-sdk>=1.43,<1.44",
+    "opentelemetry-exporter-otlp-proto-grpc>=1.43,<1.44",
+
+    # OpenTelemetry 自动埋点
+    "opentelemetry-instrumentation-fastapi>=0.64b0,<0.65",
+    "opentelemetry-instrumentation-httpx>=0.64b0,<0.65",
+    "opentelemetry-instrumentation-sqlalchemy>=0.64b0,<0.65",
+    "opentelemetry-instrumentation-redis>=0.64b0,<0.65",
+    "opentelemetry-instrumentation-logging>=0.64b0,<0.65",
+
+    # Metrics
+    "prometheus-client>=0.22,<1.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.11.28,<0.12"]
+build-backend = "uv_build"
+
+[tool.ruff]
+target-version = "py314"
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "F",
+    "I",
+    "B",
+    "UP",
+]
+ignore = []
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
