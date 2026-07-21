@@ -1,5 +1,3 @@
-"""Typed Skill execution result."""
-
 from enum import StrEnum
 from typing import Generic, TypeVar
 

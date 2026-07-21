@@ -1,5 +1,3 @@
-"""Immutable Skill metadata and safety declarations."""
-
 from enum import StrEnum
 
 from pydantic import BaseModel, ConfigDict, model_validator

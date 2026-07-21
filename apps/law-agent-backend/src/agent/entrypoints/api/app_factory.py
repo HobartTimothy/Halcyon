@@ -1,4 +1,3 @@
-"""FastAPI application factory."""
 
 from fastapi import FastAPI
 
@@ -9,7 +8,7 @@ from agent.modules.agent_runtime.graphs.main_graph.builder import build_main_gra
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title="Enterprise AI Agent", version="0.1.0")
+    app = FastAPI(title="AI 法律智能体", version="0.1.0")
     app.state.run_service = RunService(build_main_graph())
     app.include_router(health_router)
     app.include_router(runs_router)

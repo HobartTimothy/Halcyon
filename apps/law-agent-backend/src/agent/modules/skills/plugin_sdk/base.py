@@ -1,5 +1,3 @@
-"""Base class for code-registered Skills."""
-
 from abc import ABC, abstractmethod
 from typing import ClassVar, Generic, TypeVar
 

@@ -1,5 +1,3 @@
-"""Celery application factory and deterministic queue routing."""
-
 from celery import Celery
 
 from agent.bootstrap.settings import Settings, get_settings
@@ -13,6 +11,7 @@ def create_celery_app(settings: Settings | None = None) -> Celery:
         backend=resolved.result_backend_url,
         include=["agent.entrypoints.workers.tasks.agent"],
     )
+
     app.conf.update(
         task_serializer="json",
         result_serializer="json",

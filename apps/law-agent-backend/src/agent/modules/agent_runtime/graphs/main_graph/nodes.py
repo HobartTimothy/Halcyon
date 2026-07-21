@@ -1,5 +1,3 @@
-"""Deterministic node implementations used by the foundation skeleton."""
-
 from agent.modules.agent_runtime.domain.evidence import EvidenceItem
 from agent.modules.agent_runtime.graphs.main_graph.state import AgentRunState
 

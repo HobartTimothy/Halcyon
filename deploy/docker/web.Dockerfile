@@ -1,9 +1,9 @@
 FROM node:24-alpine AS build
 WORKDIR /app
 RUN npm install --global pnpm@11.15.1
-COPY apps/web/package.json apps/web/pnpm-lock.yaml* ./
+COPY apps/law-agent-web/package.json apps/law-agent-web/pnpm-lock.yaml* ./
 RUN pnpm install --no-frozen-lockfile
-COPY apps/web ./
+COPY apps/law-agent-web ./
 RUN pnpm build
 
 FROM node:24-alpine AS runtime

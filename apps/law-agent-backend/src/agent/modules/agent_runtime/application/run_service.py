@@ -1,5 +1,3 @@
-"""Application service for executing a single agent run."""
-
 from dataclasses import dataclass
 from typing import Any, cast
 
@@ -14,7 +12,6 @@ class RunResult:
 
 
 class RunService:
-    """Execute a compiled graph without coupling the application layer to LangGraph types."""
 
     def __init__(self, graph: Any) -> None:
         self._graph = graph
@@ -24,6 +21,7 @@ class RunService:
             AgentRunState,
             await self._graph.ainvoke({"run_id": run_id, "query": query}),
         )
+
         evidence = result.get("evidence", [])
         return RunResult(
             run_id=run_id,

@@ -1,12 +1,9 @@
-"""Evidence returned by research agents."""
-
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
 
 class EvidenceItem(BaseModel):
-    """Compact, immutable evidence reference safe for graph state."""
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 

@@ -2,13 +2,13 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-cd "$ROOT/apps/backend"
+cd "$ROOT/apps/law-agent-backend"
 uv sync --dev --locked
 uv run ruff check src tests
 uv run mypy src
 uv run pytest
 
-cd "$ROOT/apps/web"
+cd "$ROOT/apps/law-agent-web"
 if [[ ! -d node_modules ]]; then
   pnpm install --no-frozen-lockfile
 fi

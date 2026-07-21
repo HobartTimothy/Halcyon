@@ -1,5 +1,3 @@
-"""Strict application settings loaded from environment variables."""
-
 from enum import StrEnum
 from functools import lru_cache
 
@@ -8,7 +6,6 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Environment(StrEnum):
-    """Supported deployment environments."""
 
     DEVELOPMENT = "development"
     TEST = "test"
@@ -17,10 +14,6 @@ class Environment(StrEnum):
 
 
 class Settings(BaseSettings):
-    """Immutable runtime settings.
-
-    Unknown fields are rejected so configuration mistakes fail during startup.
-    """
 
     model_config = SettingsConfigDict(
         env_prefix="EA_",
@@ -44,6 +37,5 @@ class Settings(BaseSettings):
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
-    """Return the process-wide immutable settings instance."""
 
     return Settings()

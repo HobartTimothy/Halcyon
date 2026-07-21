@@ -1,5 +1,3 @@
-"""Deterministic registry for code-defined Skills."""
-
 from typing import Any
 
 from agent.modules.skills.plugin_sdk.base import BaseSkill
