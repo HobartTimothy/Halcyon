@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://enterprise-agent.local/contracts/run-event.schema.json",
+  "title": "RunEvent",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "event_id", "event_type", "run_id", "sequence", "data"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "event_id": {"type": "string", "minLength": 1},
+    "event_type": {
+      "enum": [
+        "run.started",
+        "stage.changed",
+        "token.delta",
+        "citation.added",
+        "approval.required",
+        "run.completed",
+        "run.failed",
+        "stream.snapshot",
+        "stream.reset"
+      ]
+    },
+    "run_id": {"type": "string", "minLength": 1},
+    "sequence": {"type": "integer", "minimum": 0},
+    "data": {"type": "object"}
+  }
+}

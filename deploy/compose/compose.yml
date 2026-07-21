@@ -1,0 +1,141 @@
+name: enterprise-ai-agent
+
+services:
+  postgres:
+    image: pgvector/pgvector:0.8.2-pg18
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-enterprise}
+      POSTGRES_USER: ${POSTGRES_USER:-enterprise}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-enterprise}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks: [data]
+
+  valkey:
+    image: valkey/valkey:9.1-alpine
+    command: ["valkey-server", "--appendonly", "yes"]
+    volumes:
+      - valkey_data:/data
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks: [app, data]
+
+  rabbitmq:
+    image: rabbitmq:4.3-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-enterprise}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-enterprise}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    networks: [app]
+
+  seaweedfs:
+    image: chrislusf/seaweedfs:4.12
+    command: ["server", "-dir=/data", "-s3", "-s3.port=8333"]
+    volumes:
+      - object_data:/data
+    expose: ["8333", "9333"]
+    networks: [data]
+
+  litellm:
+    image: ghcr.io/berriai/litellm:v1.93.0-stable
+    command: ["--config", "/app/config.yaml", "--port", "4000"]
+    environment:
+      LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY:-development-only-key}
+    volumes:
+      - ../../configs/litellm.yaml:/app/config.yaml:ro
+    expose: ["4000"]
+    networks: [app, egress]
+
+  api:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/backend.Dockerfile
+    command:
+      ["uvicorn", "enterprise_agent.entrypoints.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    environment: &backend-environment
+      EA_ENVIRONMENT: development
+      EA_DATABASE_URL: postgresql+psycopg://enterprise:${POSTGRES_PASSWORD:-enterprise}@postgres:5432/${POSTGRES_DB:-enterprise}
+      EA_BROKER_URL: amqp://${RABBITMQ_USER:-enterprise}:${RABBITMQ_PASSWORD:-enterprise}@rabbitmq:5672//
+      EA_RESULT_BACKEND_URL: redis://valkey:6379/1
+      EA_REALTIME_STREAM_URL: redis://valkey:6379/0
+      EA_MODEL_GATEWAY_URL: http://litellm:4000
+    depends_on:
+      postgres: {condition: service_healthy}
+      valkey: {condition: service_healthy}
+      rabbitmq: {condition: service_healthy}
+    expose: ["8000"]
+    networks: [edge, app, data]
+
+  stream-api:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/backend.Dockerfile
+    command:
+      ["uvicorn", "enterprise_agent.entrypoints.stream_api.main:app", "--host", "0.0.0.0", "--port", "8001"]
+    environment: *backend-environment
+    depends_on:
+      valkey: {condition: service_healthy}
+    expose: ["8001"]
+    networks: [edge, app, data]
+
+  agent-worker:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/backend.Dockerfile
+    command:
+      ["celery", "-A", "enterprise_agent.entrypoints.workers.celery_app:celery_app", "worker", "-Q", "agent.realtime,agent.resume", "--loglevel=INFO"]
+    environment: *backend-environment
+    depends_on:
+      postgres: {condition: service_healthy}
+      valkey: {condition: service_healthy}
+      rabbitmq: {condition: service_healthy}
+    networks: [app, data, egress]
+
+  web:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/web.Dockerfile
+    environment:
+      NODE_ENV: production
+    expose: ["3000"]
+    networks: [edge]
+
+  nginx:
+    image: nginx:1.29-alpine
+    volumes:
+      - ../nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      api: {condition: service_started}
+      stream-api: {condition: service_started}
+      web: {condition: service_started}
+    ports:
+      - "${HTTP_PORT:-8080}:80"
+    networks: [edge]
+
+volumes:
+  postgres_data:
+  valkey_data:
+  rabbitmq_data:
+  object_data:
+
+networks:
+  edge:
+  app:
+    internal: true
+  data:
+    internal: true
+  egress:

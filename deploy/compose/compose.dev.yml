@@ -1,0 +1,11 @@
+services:
+  api:
+    command:
+      ["uvicorn", "enterprise_agent.entrypoints.api.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    volumes:
+      - ../../apps/backend/src:/app/src
+  stream-api:
+    command:
+      ["uvicorn", "enterprise_agent.entrypoints.stream_api.main:app", "--host", "0.0.0.0", "--port", "8001", "--reload"]
+    volumes:
+      - ../../apps/backend/src:/app/src
